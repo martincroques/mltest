@@ -6,7 +6,11 @@ from switch_automation import Vlan, run_automation, sanitize_vlan_name
 app = Flask(__name__)
 
 DEFAULT_FORM = {
-    "host": "", "port": "", "protocol": "ssh", "username": "", "secret": "",
+    "host": "",
+    "port": "",
+    "protocol": "ssh",
+    "username": "",
+    "secret": "",
     "hostname": "SWITCH_AUTOMATIZADO",
     "vlans": [(10, "VLAN_DADOS"), (20, "VLAN_VOZ"), (50, "VLAN_SEGURANCA")],
 }
@@ -23,6 +27,7 @@ def index():
         for vid, vname in zip(ids, names):
             if not vid.strip() and not vname.strip():
                 continue
+                
             clean = sanitize_vlan_name(vname)
             if clean != vname.strip():
                 notes.append(f"Nome '{vname}' ajustado para '{clean}' (o IOS aceita apenas ASCII).")
@@ -32,14 +37,20 @@ def index():
             except ValueError:
                 notes.append(f"ID de VLAN inválido: '{vid}'")
 
-        form.update(host=f.get("host", "").strip(), port=f.get("port", ""),
-                    protocol=f.get("protocol", "ssh"), username=f.get("username", ""),
-                    secret=f.get("secret", ""), hostname=f.get("hostname", "").strip(),
+        form.update(host=f.get("host", "").strip(),
+                    port=f.get("port", ""),
+                    protocol=f.get("protocol", "ssh"),
+                    username=f.get("username", ""),
+                    secret=f.get("secret", ""),
+                    hostname=f.get("hostname", "").strip(),
                     vlans=form_vlans or DEFAULT_FORM["vlans"])
 
         if len(vlans) == len(form_vlans):
-            conn = {"host": form["host"], "port": form["port"], "protocol": form["protocol"],
-                    "username": form["username"], "password": f.get("password", ""),
+            conn = {"host": form["host"],
+                    "port": form["port"],
+                    "protocol": form["protocol"],
+                    "username": form["username"],
+                    "password": f.get("password", ""),
                     "secret": form["secret"]}
             result = run_automation(conn, form["hostname"], vlans, dry_run=bool(f.get("dry_run")))
 
