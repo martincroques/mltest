@@ -50,14 +50,14 @@ hostname SW1
 ip domain-name lab.local
 crypto key generate rsa modulus 2048
 ip ssh version 2
-username admin privilege 15 secret Admin@123
-enable secret Enable@123
+username admin privilege 15 secret Password
+enable secret EnablePassword
 interface vlan 1
  ip address 192.168.140.20 255.255.255.0
  no shutdown
 line vty 0 4
  login local
- transport input ssh
+ transport input ssh telnet
 ```
 
 Ambientes de teste: GNS3 / EVE-NG / Cisco CML com imagem IOSvL2, ou Cisco DevNet Sandbox.
