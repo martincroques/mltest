@@ -19,13 +19,12 @@ com alertas de divergência.
 ## Estrutura
 
 ```
-.
+/
 ├── app.py                  # Frontend Flask
 ├── switch_automation.py    # Backend: conexão, configuração, backup e validação
 ├── templates/index.html    # Interface web
 ├── tests/test_validation.py
 ├── backups/                # Backups gerados (evidência)
-├── docs/                   # Capturas de tela (evidências)
 └── requirements.txt
 ```
 
@@ -54,7 +53,7 @@ ip ssh version 2
 username admin privilege 15 secret Admin@123
 enable secret Enable@123
 interface vlan 1
- ip address 192.168.1.10 255.255.255.0
+ ip address 192.168.140.20 255.255.255.0
  no shutdown
 line vty 0 4
  login local
@@ -72,10 +71,10 @@ Ambientes de teste: GNS3 / EVE-NG / Cisco CML com imagem IOSvL2, ou Cisco DevNet
 
 ## Fluxo de execução
 
-1. Conecta ao switch e gera **backup prévio** (`*_antes_*.cfg`)
+1. Conecta ao switch e gera **backup prévio** (`<hostname>_antes_<date>.cfg`)
 2. Aplica as VLANs e altera o hostname
 3. Reconecta (o prompt mudou), executa `write memory`
-4. Gera **backup pós-configuração** (`*_depois_*.cfg`)
+4. Gera **backup pós-configuração** (`<hostname>_depois_<date>.cfg`)
 5. **Valida**: hostname e cada VLAN (ID + nome). VLANs existentes que não fazem parte do desejado (exceto 1 e 1002-1005) geram alerta
 
 ## Testes
