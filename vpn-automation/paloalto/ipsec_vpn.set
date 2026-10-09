@@ -1,0 +1,45 @@
+# Palo Alto - VPN IPSec route-based para Fortigate (exemplo conceitual, formato "set")
+# Substituir ${PSK} por segredo vindo de cofre. Aplicar em modo configure e depois "commit".
+
+# Objetos de endereço
+set address LAN-FG-192.168.10.0_24 ip-netmask 192.168.10.0/24
+set address LAN-PA-192.168.20.0_24 ip-netmask 192.168.20.0/24
+
+# Crypto profiles (Phase 1 e Phase 2)
+set network ike crypto-profiles ike-crypto-profiles IKE-AES256-SHA256 encryption aes-256-cbc
+set network ike crypto-profiles ike-crypto-profiles IKE-AES256-SHA256 hash sha256
+set network ike crypto-profiles ike-crypto-profiles IKE-AES256-SHA256 dh-group group14
+set network ike crypto-profiles ike-crypto-profiles IKE-AES256-SHA256 lifetime hours 8
+set network ike crypto-profiles ipsec-crypto-profiles IPSEC-AES256-SHA256 esp encryption aes-256-cbc
+set network ike crypto-profiles ipsec-crypto-profiles IPSEC-AES256-SHA256 esp authentication sha256
+set network ike crypto-profiles ipsec-crypto-profiles IPSEC-AES256-SHA256 dh-group group14
+set network ike crypto-profiles ipsec-crypto-profiles IPSEC-AES256-SHA256 lifetime hours 1
+
+# Interface de túnel 169.255.1.2/30, zona e virtual router
+set network interface tunnel units tunnel.1 ip 169.255.1.2/30
+set network interface tunnel units tunnel.1 mtu 1400
+set zone VPN network layer3 tunnel.1
+set network virtual-router default interface tunnel.1
+
+# IKE Gateway (Phase 1)
+set network ike gateway GW-TO-FG protocol ikev2 ike-crypto-profile IKE-AES256-SHA256
+set network ike gateway GW-TO-FG protocol ikev2 dpd enable yes
+set network ike gateway GW-TO-FG protocol ikev2 dpd interval 10
+set network ike gateway GW-TO-FG local-address interface ethernet1/1
+set network ike gateway GW-TO-FG local-address ip 198.51.100.1/24
+set network ike gateway GW-TO-FG peer-address ip 203.0.113.1
+set network ike gateway GW-TO-FG authentication pre-shared-key key ${PSK}
+set network ike gateway GW-TO-FG protocol-common nat-traversal enable no
+
+# IPSec Tunnel (Phase 2) com proxy-ID
+set network tunnel ipsec TUN-TO-FG auto-key ike-gateway GW-TO-FG
+set network tunnel ipsec TUN-TO-FG auto-key ipsec-crypto-profile IPSEC-AES256-SHA256
+set network tunnel ipsec TUN-TO-FG auto-key proxy-id PROXY-LAN local 192.168.20.0/24 remote 192.168.10.0/24 protocol any
+set network tunnel ipsec TUN-TO-FG tunnel-interface tunnel.1
+
+# Rota estática para a LAN do Fortigate
+set network virtual-router default routing-table ip static-route TO-LAN-FG destination 192.168.10.0/24 interface tunnel.1
+
+# Políticas de segurança (zonas LAN e VPN; ajustar o nome da zona da LAN)
+set rulebase security rules LAN-PA-to-LAN-FG from LAN to VPN source LAN-PA-192.168.20.0_24 destination LAN-FG-192.168.10.0_24 application any service application-default action allow log-end yes
+set rulebase security rules LAN-FG-to-LAN-PA from VPN to LAN source LAN-FG-192.168.10.0_24 destination LAN-PA-192.168.20.0_24 application any service application-default action allow log-end yes
