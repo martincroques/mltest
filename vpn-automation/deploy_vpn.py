@@ -73,7 +73,7 @@ class Fortigate:
             "src-subnet": net_mask(f["lan_subnet"]),
             "dst-subnet": net_mask(pa["lan_subnet"])})
         # Objetos de endereço, IP do túnel, rota e políticas: mesmo padrão
-        # (campos em vpn/fortigate/ipsec_vpn.conf).
+        # (campos em fortigate/ipsec_vpn.conf).
 
     def tunnel_up(self, name):
         r = self.s.get(f"{self.url}/monitor/vpn/ipsec")
