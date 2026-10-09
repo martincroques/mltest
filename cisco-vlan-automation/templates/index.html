@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automação de Switch Cisco</title>
+<style>
+  body{font-family:Segoe UI,Arial,sans-serif;background:#f3f5f8;margin:0;color:#1f2933}
+  .wrap{max-width:860px;margin:30px auto;padding:0 16px}
+  h1{margin-bottom:4px} .sub{color:#52606d;margin-top:0}
+  .card{background:#fff;border-radius:8px;padding:20px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  label{display:block;font-size:.85rem;font-weight:600;margin:10px 0 4px}
+  input,select{width:100%;padding:8px;border:1px solid #cbd2d9;border-radius:5px;box-sizing:border-box}
+  .row{display:flex;gap:12px} .row>div{flex:1}
+  .vlan{display:flex;gap:10px;margin-bottom:8px} .vlan input:first-child{flex:0 0 110px}
+  button{background:#0b6bcb;color:#fff;border:0;padding:10px 18px;border-radius:5px;cursor:pointer;font-size:1rem}
+  button.sec{background:#e4e7eb;color:#1f2933}
+  .ok{color:#127a3d;font-weight:600} .bad{color:#b42318;font-weight:600}
+  .alert{background:#fde8e8;border-left:4px solid #b42318;padding:10px;margin:6px 0;border-radius:4px}
+  .good{background:#e3f6ea;border-left:4px solid #127a3d;padding:10px;margin:6px 0;border-radius:4px}
+  .note{background:#fff6dd;border-left:4px solid #d69e00;padding:10px;margin:6px 0;border-radius:4px}
+  pre{background:#102a43;color:#d9e2ec;padding:12px;border-radius:6px;overflow:auto;white-space:pre-wrap}
+</style>
+</head>
+<body><div class="wrap">
+<h1>Automação de Switch Cisco</h1>
+<p class="sub">Configuração de VLANs e hostname com salvamento, backup e validação.</p>
+
+<form method="post">
+<div class="card">
+  <h3>Conexão com o switch</h3>
+  <div class="row">
+    <div><label>IP / Host</label><input name="host" value="{{ form.host }}" required placeholder="192.168.1.10"></div>
+    <div><label>Protocolo</label>
+      <select name="protocol">
+        <option value="ssh" {{ 'selected' if form.protocol=='ssh' }}>SSH</option>
+        <option value="telnet" {{ 'selected' if form.protocol=='telnet' }}>Telnet (laboratório)</option>
+      </select></div>
+    <div><label>Porta (opcional)</label><input name="port" value="{{ form.port }}" placeholder="22"></div>
+  </div>
+  <div class="row">
+    <div><label>Usuário</label><input name="username" value="{{ form.username }}"></div>
+    <div><label>Senha</label><input type="password" name="password" autocomplete="off"></div>
+    <div><label>Enable secret (opcional)</label><input type="password" name="secret" value="{{ form.secret }}" autocomplete="off"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Configuração desejada</h3>
+  <label>Hostname</label>
+  <input name="hostname" value="{{ form.hostname }}" required>
+  <label>VLANs (ID e nome)</label>
+  <div id="vlans">
+    {% for vid, vname in form.vlans %}
+    <div class="vlan"><input name="vlan_id" value="{{ vid }}" placeholder="ID"><input name="vlan_name" value="{{ vname }}" placeholder="Nome"></div>
+    {% endfor %}
+  </div>
+  <button type="button" class="sec" onclick="addVlan()">+ Adicionar VLAN</button>
+  <label style="margin-top:16px"><input type="checkbox" name="dry_run" style="width:auto"> Modo simulação (apenas mostra os comandos, não conecta ao switch)</label>
+</div>
+<button type="submit">Aplicar configuração</button>
+</form>
+
+{% for n in notes %}<div class="note">{{ n }}</div>{% endfor %}
+
+{% if result %}
+<div class="card" style="margin-top:20px">
+  <h3>Resultado</h3>
+  {% if result.error %}
+    <div class="alert"><strong>Erro:</strong> {{ result.error }}</div>
+  {% endif %}
+
+  {% if result.report %}
+    {% if result.report.ok %}
+      <div class="good">✔ Configuração validada: o switch está exatamente como o desejado.</div>
+    {% else %}
+      <div class="alert">⚠ Divergência de configuração detectada.</div>
+    {% endif %}
+    <table width="100%" cellpadding="4">
+      {% for ok, msg in result.report.checks %}
+      <tr><td class="{{ 'ok' if ok else 'bad' }}">{{ '✔' if ok else '✘' }}</td><td>{{ msg }}</td></tr>
+      {% endfor %}
+    </table>
+    {% for w in result.report.warnings %}<div class="alert">{{ w }}</div>{% endfor %}
+  {% elif result.dry_run and not result.error %}
+    <div class="note">Simulação concluída. Nada foi enviado ao equipamento.</div>
+  {% endif %}
+
+  {% if result.backups %}
+    <h4>Backups gerados</h4>
+    <ul>{% for b in result.backups %}<li>{{ b }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  <h4>Log de execução</h4>
+  <pre>{{ result.log | join('\n') }}</pre>
+</div>
+{% endif %}
+</div>
+<script>
+function addVlan(){
+  const d=document.createElement('div'); d.className='vlan';
+  d.innerHTML='<input name="vlan_id" placeholder="ID"><input name="vlan_name" placeholder="Nome">';
+  document.getElementById('vlans').appendChild(d);
+}
+</script>
+</body></html>
