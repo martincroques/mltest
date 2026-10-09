@@ -11,10 +11,14 @@ Uso:
   python deploy_vpn.py
 Exit codes: 0 OK | 1 divergência | 2 falha de aplicação | 3 erro de execução
 """
-import argparse, ipaddress, json, os, sys
-from pathlib import Path
-
+import argparse
+import ipaddress
+import json
+import os
+import sys
 import requests
+
+from pathlib import Path
 from netmiko import ConnectHandler
 
 BASE = Path(__file__).resolve().parent
