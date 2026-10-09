@@ -1,0 +1,24 @@
+{
+  "tunnel_network": "169.255.1.0/30",
+  "fortigate": {
+    "host": "203.0.113.1",
+    "mgmt_url": "https://203.0.113.1",
+    "wan_ip": "203.0.113.1",
+    "wan_interface": "port1",
+    "lan_subnet": "192.168.10.0/24",
+    "tunnel_ip": "169.255.1.1",
+    "phase1_name": "VPN-TO-PA",
+    "phase2_name": "VPN-TO-PA-P2"
+  },
+  "paloalto": {
+    "host": "198.51.100.1",
+    "wan_ip": "198.51.100.1",
+    "wan_interface": "ethernet1/1",
+    "lan_subnet": "192.168.20.0/24",
+    "tunnel_ip": "169.255.1.2",
+    "gateway_name": "GW-TO-FG",
+    "tunnel_name": "TUN-TO-FG"
+  },
+  "ike": {"version": 2, "encryption": "aes-256-cbc", "hash": "sha256", "dh_group": 14, "lifetime_s": 28800},
+  "ipsec": {"encryption": "aes-256-cbc", "auth": "sha256", "pfs_group": 14, "lifetime_s": 3600}
+}
