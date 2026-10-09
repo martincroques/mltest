@@ -93,12 +93,5 @@ pytest -v
 
 ## Evidências
 
-> Adicione aqui as capturas de tela (pasta `docs/`):
->
-> - `docs/frontend.png` – formulário do frontend
-> - `docs/resultado.png` – resultado e validação no frontend
-> - `docs/cli_show_vlan.png` – `show vlan brief` no switch
-> - `docs/cli_hostname.png` – prompt/`show running-config | include hostname`
-> - `docs/validacao_alerta.png` – alerta de divergência (ex.: VLAN 99 criada manualmente)
->
-> Backups de exemplo: pasta `backups/`.
+
+> Backups e evidencias de exemplo: pasta `backups/`.
